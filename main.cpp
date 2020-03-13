@@ -70,15 +70,48 @@ int main()
 }
 }
 
-//call Example::main() in main()
-
-
-
-
-
 
 /*
  1)
+ */
+struct Bakery   
+{
+    Bakery () {}
+    
+    int numOfOvens =2;
+    int amountOfBread = 250;
+    int openingTime = 8;
+    int closingTime = 18;
+
+    bool checkOpen (int opening, int closing, int current);
+    int bakeBread (int bakingRounds, int breadPerOven);
+};
+
+bool Bakery::checkOpen (int opening, int closing, int current)
+{
+    if (current > opening && current < closing)
+    {
+        std::cout << "Bakery is Open, Come in!" << std::endl;
+        return true;
+    }
+    std::cout << "Bakery is Closed! Opening Times: " << opening << " to " << closing << "."  << std::endl;
+    return false;
+}
+
+int Bakery::bakeBread (int bakingRounds, int breadPerOven)
+{
+    int totalAmount = 0;
+    for (int i = 0; i < bakingRounds;  i+= 1)
+    {
+        std::cout << "Baked " << breadPerOven << " Breads in round " << (i+1) <<std::endl;
+        totalAmount += breadPerOven;
+    }
+    std::cout << "Baked a total amount of: " << totalAmount << " new Breads." << std::endl;
+    return (totalAmount);
+}
+
+/*
+ 2)
  */
 struct Human 
 {
@@ -94,6 +127,7 @@ struct Human
 
     void wakeUp();
     bool isHungry(int timeAwake, int stamina);
+    int eatBread(int howMany, Bakery bakery);
 };
 
 void Human::wakeUp()
@@ -110,42 +144,21 @@ bool Human::isHungry(int timeAwake, int stamina)
     return false;
 }
 
-
-/*
- 2)
- */
-struct Bakery   
+int Human::eatBread(int howMany, Bakery bakery)
 {
-    int numOfOvens =2;
-    int amountOfBread = 250;
-    int openingTime = 8;
-    int closingTime = 18;
-
-    Bakery ()
+    std::cout << "Breads in the Bakery: " << bakery.amountOfBread << std::endl;
+    std::cout << "I'm eating " << howMany << " breads!" << std::endl;
+    bakery.amountOfBread -= howMany;
+    if (bakery.amountOfBread <= 0)
     {
-        std::cout << "The Bakery is open between " <<  openingTime << " and " << closingTime << std::endl;
+        std::cout << "-> Bakery is out of Bread! Bake some new one via the bakeBread function." << std::endl;
+        return 0;
     }
-
-    bool checkOpen (int opening, int closing, int current);
-    int bakeBread (int numOfOvens, int breadPerOven);
-};
-
-bool Bakery::checkOpen (int opening, int closing, int current)
-{
-    if (current > opening && current < closing)
-    {
-        std::cout << "Bakery is Open, Come in!" << std::endl;
-        return true;
-    }
-    std::cout << "Bakery is Closed! Opening Times: " << opening << " to " << closing << "."  << std::endl;
-    return false;
+    std::cout << "-> Breads in the Bakery: " << bakery.amountOfBread << std::endl;
+    return bakery.amountOfBread;
+    
+   
 }
-
-int Bakery::bakeBread (int numOvens, int breadPerOven)
-{
-    return (amountOfBread-(numOvens*breadPerOven));
-}
-
 
 /*
  3)
@@ -165,7 +178,10 @@ struct PublicBus
         int seatRow;
         bool isUsed;
         int maxWeight;
-        BusSeat() : seatRow(15), isUsed(true), maxWeight(350) {std::cout << "This is a Bus Seat" << std::endl;}
+        BusSeat() : seatRow(15), isUsed(true), maxWeight(350) 
+        {
+            std::cout << "This is a Bus Seat" << std::endl;
+        }
         void moveBackrest (bool isBack);
         void setSeathHeight (int heigth);
     };
@@ -249,12 +265,17 @@ struct Wizard
 };
 
 Wizard::Wizard () : 
-    health (140),
-    mana (50),
-    equipmentSlot (1)
-    {
-        std::cout << "New Wizard arrived. Health: " << health << " Mana: " << mana << std::endl;
-    }
+health (140),
+mana (50),
+equipmentSlot (1)
+{
+    std::cout << "New Wizard arrived. Health: " << health << " Mana: " << mana << std::endl;
+}
+
+Wizard::WizardStaff::WizardStaff ()
+{
+    std::cout << "That Staffs quite a rare item!" << std::endl;
+}
 
 int Wizard::equipWeapon (Wizard gandalf)
 {
@@ -278,7 +299,19 @@ int Wizard::unequipWeapon (Wizard gandalf)
 
 void Wizard::attack (WizardStaff rareStaff, int enemyHealth)
 {
-    enemyHealth -= rareStaff.baseDamage;
+    std::cout << "Attacking the Enemy!" << std::endl;
+    for (int i = rareStaff.baseDamage; i >= 0; i -= 50 )
+    {
+        std::cout << "Enemy Health at " << enemyHealth << std::endl;
+        std::cout << "Good HIT - Dealt 50 Damage!" << std::endl;
+        enemyHealth -= 50;
+        if (enemyHealth <= 0)
+        {
+            std::cout << "Enemy Eliminated!" << std::endl;
+            return;
+        }
+
+    }
 }
 
 void Wizard::WizardStaff::setSkin (int colorIndex, int logoIndex)
@@ -299,17 +332,24 @@ int Wizard::WizardStaff::chargeUp (int chargingTime, int currentCharge)
 struct CommonTreasureChest
 {
     int numberOfItems = 5;
-    bool isRare = false;
     bool isOpened;
+    bool isRare;  
 
-    CommonTreasureChest() :
-    isOpened (false)
+    CommonTreasureChest(bool rarity) : isOpened (false) , isRare (rarity)
     {
-        std::cout << "This is a common Treasure Chest with a Max Capacity of 5 items" << std::endl;
+        if (isRare == false)
+        {
+             std::cout << "This is a common Treasure Chest with a Max Capacity of 5 items" << std::endl;
+        }
+        else if (isRare == true)
+        {
+            std::cout << "This is a RARE Treasure Chest with a Max Capacity of 5 items" << std::endl;
+        }
     }
 
     bool openChest(bool openState);
     bool closeChest(bool openState);
+    void lootChest();
 };
 
 bool CommonTreasureChest::openChest (bool openState)
@@ -334,6 +374,19 @@ bool CommonTreasureChest::closeChest (bool openState)
     return true;
 }
 
+void CommonTreasureChest::lootChest ()
+{
+    for (int i = numberOfItems; i != 0; i -= 1 )
+    {
+        if (isRare == true && i == 1)
+        {
+            std::cout << "Legendary Item!!!" << std::endl;
+            return;
+        }
+        std::cout << "Found a common item!" << std::endl;   
+    }
+}
+
 
 /*
  6)
@@ -344,14 +397,26 @@ struct AudioPlugin
     bool initialized = true;
     int samplerate = 41000;
 
-    AudioPlugin(){std::cout << "The Plugin is running at " << samplerate << " Samples per Second." << std::endl;}
+    AudioPlugin()
+    {
+        std::cout << "The Plugin is running at " << samplerate << " Samples per Second." << std::endl;
+    } 
     
     void processAudio();
 };
 
 void AudioPlugin::processAudio()
 {
-    std::cout << "Processing the Audio Block" << std::endl;
+    int i = 0;
+    int sampleblock = 32;
+    int processingspeed = 8;
+    while (i < sampleblock)
+    {
+        i += processingspeed;
+        std::cout << i << " out of " << sampleblock << " Samples updated.." << std::endl;
+    }
+
+
 }
 
 
@@ -365,7 +430,10 @@ struct AudioEvent
     float length = 250.35f;
     int eventId = 15;
 
-    AudioEvent() : samplerate(48000), bitDepth (24) {std::cout << "Event Lenght: " << length << " Event ID: " << eventId << std::endl;}
+    AudioEvent() : samplerate(48000), bitDepth (24) 
+    {
+        std::cout << "Event Lenght: " << length << " Event ID: " << eventId << std::endl;
+    } 
 
     int getLength(int eventId, int eventSamplerate);
     void generateWaveform(float eventLength, int id);
@@ -392,7 +460,10 @@ struct AudioEditor
 {
     int samplerate = 48000;
 
-    AudioEditor(){std::cout << "Splash Screen: Sound Forge 22" << std::endl;}
+    AudioEditor()
+    {
+        std::cout << "Splash Screen: Sound Forge 22" << std::endl;
+    } 
     
     void importFile();
     void cutEvent (float cursorPosition, AudioEvent someClip);
@@ -426,6 +497,7 @@ struct Piano
 
     void pressSustainPedal();
     void releaseSustainPedal();
+    void playKeys(int startingKey, int endingKey, int noteSteps);
 };
 
 Piano::Piano() : 
@@ -448,6 +520,16 @@ void Piano::releaseSustainPedal()
     std::cout << "Sustain Pedal is released" << std::endl;
 }
 
+void Piano::playKeys(int startingKey, int endingKey, int noteSteps)
+{
+    std::cout << "-> Playing " << ((endingKey-startingKey+noteSteps) / noteSteps) 
+    << " Keys from: " << startingKey << " to " << endingKey << std::endl;
+    for (int i = startingKey; i <= endingKey; i += noteSteps)
+    {
+        std::cout << "Playing Key " << i << std::endl;
+    }
+}
+
 
 /*
  10)
@@ -457,7 +539,10 @@ struct ConcertHall
     bool concertOngoing = false;
     int visitorCount = 1500;
 
-    ConcertHall(){std::cout << "In This Hall fit " << visitorCount << " Visitors." << std::endl;}
+    ConcertHall()
+    {
+        std::cout << "In This Hall fit " << visitorCount << " Visitors." << std::endl;
+    } 
 
     void addInstrumentToStage(Piano);
 };
@@ -481,6 +566,11 @@ int main()
     Bakery TastyBreads;
     TastyBreads.checkOpen(8, 18, 20);
     TastyBreads.checkOpen(8, 18, 10);
+    TastyBreads.amountOfBread = Peter.eatBread(15, TastyBreads);
+    TastyBreads.amountOfBread =  Peter.eatBread(5, TastyBreads);
+    TastyBreads.amountOfBread =  Peter.eatBread(250, TastyBreads);
+    TastyBreads.amountOfBread += TastyBreads.bakeBread(9,10);
+    TastyBreads.amountOfBread =  Peter.eatBread(80, TastyBreads);
 
     std::cout << std::endl;
 
@@ -498,17 +588,22 @@ int main()
     std::cout << std::endl;
 
     Wizard GandalfTheGrey;
+    Wizard::WizardStaff GandalfsStaff;
     //Calling equipWeapon function sets equipmentSlot Variable to 2, which allows the unequipWeapon functions if statement
     GandalfTheGrey.equipmentSlot = GandalfTheGrey.equipWeapon(GandalfTheGrey);  
     GandalfTheGrey.unequipWeapon(GandalfTheGrey);
+    GandalfTheGrey.attack(GandalfsStaff , 250);
 
     std::cout << std::endl;
 
-    CommonTreasureChest Box01;
+    CommonTreasureChest Box01 (false);
+    Box01.lootChest();
     Box01.isOpened = Box01.openChest(Box01.isOpened);
     Box01.openChest(Box01.isOpened);
     Box01.isOpened = Box01.closeChest(Box01.isOpened);
     Box01.closeChest(Box01.isOpened);
+    CommonTreasureChest Box02 (true);
+    Box02.lootChest();
 
     std::cout << std::endl;
 
@@ -529,6 +624,8 @@ int main()
 
     Piano GrandPiano;
     GrandPiano.pressSustainPedal();
+    GrandPiano.playKeys(25,30, 1);
+    GrandPiano.playKeys(50,80, 10);
 
     std::cout << std::endl;
 
